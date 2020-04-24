@@ -4,9 +4,9 @@ phases:
     commands:
        - yarn install
        - yarn build
-  artifacts:
-    files: "**/*"
-    discard-paths: no
-    base-directory: dist
+artifacts:
+  files: "**/*"
+  discard-paths: no
+  base-directory: dist
 
 
