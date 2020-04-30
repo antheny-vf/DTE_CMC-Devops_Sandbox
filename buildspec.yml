@@ -9,10 +9,6 @@ phases:
       - echo Build started on `date`
       - yarn build
 artifacts:
-  files:
-    - '**/*'
-  base-directory: 'build'
-artifacts:
   secondary-artifacts:
     artifact1:
       base-directory: $CODEBUILD_SRC_DIR
