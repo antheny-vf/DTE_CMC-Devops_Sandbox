@@ -12,3 +12,13 @@ artifacts:
   files:
     - '**/*'
   base-directory: 'build'
+artifacts:
+  secondary-artifacts:
+    artifact1:
+      base-directory: $CODEBUILD_SRC_DIR
+      files:
+        - '**/*'
+    artifact2:
+      base-directory: $CODEBUILD_SRC_DIR_Build2Artifact
+      files:
+        - '**/*'
