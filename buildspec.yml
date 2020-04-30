@@ -11,5 +11,9 @@ phases:
 artifacts:
   base-directory: build
   files:
-    - '**/*'
-
+    - "**/*"
+  secondary-artifacts:
+    DevArtifact:
+      base-directory: build
+      files:
+        - "**/*"
