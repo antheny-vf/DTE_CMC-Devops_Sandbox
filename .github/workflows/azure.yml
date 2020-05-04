@@ -8,11 +8,11 @@ jobs:
   to_aws_then_azure:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
-      - uses: actions/checkout@v2
       - name: Build React app
         run: |
           yarn install
