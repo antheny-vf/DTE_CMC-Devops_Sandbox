@@ -41,4 +41,4 @@ jobs:
           source_dir: "build"
           container_name: www
           connection_string: ${{ secrets.CONNECTION_STRING }}
-          extra_args: '--destination-path ${GITHUB_REF##*/}'
+          extra_args: '--destination-path develop'
