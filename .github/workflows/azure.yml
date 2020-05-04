@@ -13,17 +13,17 @@ jobs:
         run: |
           yarn install
           yarn build
-      - name: AWS, sync
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "us-east-1"
-          SOURCE_DIR: "build"
-          DEST_DIR:  ${GITHUB_REF#refs/heads/}
+      # - name: AWS, sync
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl public-read --follow-symlinks --delete
+      #   env:
+      #     AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: "us-east-1"
+      #     SOURCE_DIR: "build"
+      #     DEST_DIR:  ${GITHUB_REF#refs/heads/}
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
       #   env:
