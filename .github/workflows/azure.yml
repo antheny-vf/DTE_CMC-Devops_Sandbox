@@ -43,6 +43,5 @@ jobs:
         uses: bacongobbler/azure-blob-storage-upload@v1.1.1
         with:
           source_dir: "build"
-          container_name: "$web"
+          container_name: "$web/${{ steps.extract_branch.outputs.branch }}"
           connection_string: ${{ secrets.ConnectionString }}
-          extra_args: --destination-path /${{ steps.extract_branch.outputs.branch }}
