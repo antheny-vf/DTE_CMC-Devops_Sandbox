@@ -41,3 +41,4 @@ jobs:
           source_dir: "build"
           container_name: $web
           connection_string: ${{ secrets.CONNECTION_STRING }}
+          extra_args: --destination-path ${GITHUB_REF##*/}'
