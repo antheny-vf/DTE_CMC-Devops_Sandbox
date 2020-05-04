@@ -36,18 +36,9 @@ jobs:
           echo "REACT_APP_ENV=azure_special" > .env
           yarn build
       - name: Upload To Azure Blob Storage
-        on:
-          push:
-            branches:
-              - master
-        jobs:
-          upload:
-            runs-on: ubuntu-latest
-            steps:
-              - uses: actions/checkout@v2
-              - uses: bacongobbler/azure-blob-storage-upload@v1.1.1
-                with:
-                  source_dir: "build"
-                  container_name: www
-                  connection_string: ${{ secrets.CONNECTION_STRING }}
-                  extra_args: '--destination-path ${GITHUB_REF##*/}'
+        uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+        with:
+          source_dir: "build"
+          container_name: www
+          connection_string: ${{ secrets.CONNECTION_STRING }}
+          extra_args: '--destination-path ${GITHUB_REF##*/}'
