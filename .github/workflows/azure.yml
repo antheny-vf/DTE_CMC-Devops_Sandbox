@@ -8,6 +8,9 @@ jobs:
   to_aws_then_azure:
     runs-on: ubuntu-latest
     steps:
+      - name: Extract branch name
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - uses: actions/checkout@v2
       - name: Build React app
         run: |
@@ -41,4 +44,4 @@ jobs:
           source_dir: "build"
           container_name: "$web"
           connection_string: ${{ secrets.ConnectionString }}
-          extra_args: --destination-path /${GITHUB_REF##*/}
+          extra_args: --destination-path /${{ steps.extract_branch.outputs.branch }}
