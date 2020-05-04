@@ -13,16 +13,16 @@ jobs:
         run: |
           yarn install
           yarn build
-      - name: AWS, sync
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "us-east-1"
-          SOURCE_DIR: "build"
+      # - name: AWS, sync
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl public-read --follow-symlinks --delete
+      #   env:
+      #     AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: "us-east-1"
+      #     SOURCE_DIR: "build"
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
       #   env:
@@ -35,9 +35,19 @@ jobs:
         run: |
           echo "REACT_APP_ENV=azure_special" > .env
           yarn build
-      - name: Azure, upload-batch
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.0.72
-          inlineScript: |
-            az storage blob upload-batch -d "\$web\${GITHUB_REF##*/}" -s build --connection-string "${{ secrets. CONNECTION_STRING }}"
+      - name: Upload To Azure Blob Storage
+        on:
+          push:
+            branches:
+              - master
+        jobs:
+          upload:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v2
+              - uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+                with:
+                  source_dir: "build"
+                  container_name: www
+                  connection_string: ${{ secrets.CONNECTION_STRING }}
+                  extra_args: '--destination-path ${GITHUB_REF##*/}'
