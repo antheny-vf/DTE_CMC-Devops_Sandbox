@@ -13,6 +13,9 @@ jobs:
         run: |
           yarn install
           yarn build
+      - name: Extract branch name
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: AWS, sync
         uses: jakejarvis/s3-sync-action@master
         with:
@@ -23,7 +26,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "us-east-1"
           SOURCE_DIR: "build"
-          DEST_DIR:  ${GITHUB_REF#refs/heads/}
+          DEST_DIR:  ${{ steps.extract_branch.outputs.branch }}
 
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
@@ -32,7 +35,6 @@ jobs:
       #     PATHS: '/*'
       #     AWS_REGION: 'us-east-1'
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       # - name: Azure, set ENV & rebuild
       #   run: |
