@@ -39,5 +39,5 @@ jobs:
         uses: bacongobbler/azure-blob-storage-upload@v1.1.1
         with:
           source_dir: "build"
-          container_name: www
+          container_name: vfdtecmcgithubactiontest
           connection_string: ${{ secrets.CONNECTION_STRING }}
