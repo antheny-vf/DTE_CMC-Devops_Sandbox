@@ -24,7 +24,6 @@ jobs:
           AWS_REGION: "us-east-1"
           SOURCE_DIR: "build"
           DEST_DIR:  ${GITHUB_REF#refs/heads/}
-
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
       #   env:
@@ -33,14 +32,14 @@ jobs:
       #     AWS_REGION: 'us-east-1'
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      # - name: Azure, set ENV & rebuild
-      #   run: |
-      #     echo "REACT_APP_ENV=azure_special" > .env
-      #     yarn build
-      # - name: Azure, upload-batch
-      #   uses: azure/CLI@v1
-      #   with:
-      #     azcliversion: 2.0.72
-      #     inlineScript: |
-      #       az storage blob delete-batch -s "\$web" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
-      #       az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+      - name: Azure, set ENV & rebuild
+        run: |
+          echo "REACT_APP_ENV=azure_special" > .env
+          yarn build
+      - name: Azure, upload-batch
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az storage blob delete-batch -s "\$web/${GITHUB_REF##*/}" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+            az storage blob upload-batch -d "\$web/${GITHUB_REF##*/}" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
