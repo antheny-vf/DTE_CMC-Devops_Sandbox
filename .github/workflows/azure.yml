@@ -23,7 +23,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: "us-east-1"
           SOURCE_DIR: "build"
-          DEST_DIR:  ${GITHUB_REF#refs/heads/}
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
       #   env:
@@ -41,5 +40,5 @@ jobs:
         with:
           azcliversion: 2.0.72
           inlineScript: |
-            az storage blob delete-batch -s "\$web" --connection-string "${{ secrets. CONNECTION_STRING }}"
-            az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets. CONNECTION_STRING }}"
+            az storage blob delete-batch -s "\$web\${GITHUB_REF##*/}" --connection-string "${{ secrets. CONNECTION_STRING }}"
+            az storage blob upload-batch -d "\$web\${GITHUB_REF##*/}" -s build --connection-string "${{ secrets. CONNECTION_STRING }}"
