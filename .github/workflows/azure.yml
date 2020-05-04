@@ -40,5 +40,5 @@ jobs:
         uses: bacongobbler/azure-blob-storage-upload@v1.1.1
         with:
           source_dir: "build"
-          container_name: '$web/${GITHUB_REF##*/}'
+          container_name: \$web\${GITHUB_REF##*/}
           connection_string: ${{ secrets.CONNECTION_STRING }}
