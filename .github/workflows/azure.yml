@@ -41,3 +41,4 @@ jobs:
           source_dir: "build"
           container_name: "$web/${GITHUB_REF##*/}"
           connection_string: ${{ secrets.ConnectionString }}
+          sync: true
