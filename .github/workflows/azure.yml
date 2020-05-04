@@ -31,7 +31,6 @@ jobs:
       #     AWS_REGION: 'us-east-1'
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
       - name: Azure, set ENV & rebuild
         run: |
           echo "REACT_APP_ENV=azure_special" > .env
@@ -40,5 +39,5 @@ jobs:
         uses: bacongobbler/azure-blob-storage-upload@v1.1.1
         with:
           source_dir: "build"
-          container_name: \$web\${GITHUB_REF##*/}
-          connection_string: ${{ secrets.ConnectionString }}
+          container_name: "$web"
+          connection_string: ${{ secrets.CONNECTION_STRING }}
