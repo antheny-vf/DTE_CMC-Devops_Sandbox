@@ -1,14 +1,25 @@
-on: [push]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 jobs:
-  build:
+  to_aws_then_azure:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.0.100'
-    - uses: lauchacarro/Azure-Storage-Action@master
-      with:
-        enabled-static-website: 'true'
-        folder: 'build'
-        connection-string: ${{ secrets.CONNECTION_STRING }}
+      - uses: actions/checkout@v2
+      - name: Build React app
+        run: |
+          yarn install
+          yarn build
+      - name: Azure, set ENV & rebuild
+        run: |
+          echo "REACT_APP_ENV=azure_special" > .env
+          yarn build
+      - name: Azure, upload-batch
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.0.72
+          inlineScript: |
+            az storage blob delete-batch -s "\$web" --connection-string "${{ secrets.CONNECTION_STRING }}"
+            az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets.CONNECTION_STRING }}"
