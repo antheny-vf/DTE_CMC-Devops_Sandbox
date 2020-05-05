@@ -39,12 +39,17 @@ jobs:
         run: |
           echo "REACT_APP_ENV=azure_special" > .env
           yarn build
-      - name: Upload To Azure Blob Storage
+      - name: Upload To Azure Blob Storage - Master
+        if: ${{github.ref == 'refs/heads/master'}}
         uses: bacongobbler/azure-blob-storage-upload@v1.1.1
         with:
           source_dir: "build"
           container_name: "$web"
-          if: ${{github.ref == 'refs/heads/master'}}
-            connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
-          if: ${{github.ref == 'refs/heads/develop'}}
-            connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
+          connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
+      - name: Upload To Azure Blob Storage - Develop
+        if: ${{github.ref == 'refs/heads/develop'}}
+        uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+        with:
+          source_dir: "build"
+          container_name: "$web"
+          connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
