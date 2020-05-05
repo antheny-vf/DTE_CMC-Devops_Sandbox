@@ -9,21 +9,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: Build React app
         run: |
           yarn install
           yarn build
-      - name: AWS, sync
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --acl public-read --follow-symlinks --delete
-        env:
-          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: "us-east-1"
-          SOURCE_DIR: "build"
-
+      # - name: AWS, sync
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl public-read --follow-symlinks --delete
+      #   env:
+      #     AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: "us-east-1"
+      #     SOURCE_DIR: "build"
       # - name: AWS, invalidate CF cache
       #   uses: chetan/invalidate-cloudfront-action@master
       #   env:
@@ -32,14 +35,21 @@ jobs:
       #     AWS_REGION: 'us-east-1'
       #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      # - name: Azure, set ENV & rebuild
-      #   run: |
-      #     echo "REACT_APP_ENV=azure_special" > .env
-      #     yarn build
-      # - name: Azure, upload-batch
-      #   uses: azure/CLI@v1
-      #   with:
-      #     azcliversion: 2.0.72
-      #     inlineScript: |
-      #       az storage blob delete-batch -s "\$web" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
-      #       az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+      - name: Azure, set ENV & rebuild
+        run: |
+          echo "REACT_APP_ENV=azure_special" > .env
+          yarn build
+      - name: Upload To Azure Blob Storage - Master
+        if: ${{github.ref == 'refs/heads/master'}}
+        uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+        with:
+          source_dir: "build"
+          container_name: "$web"
+          connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
+      - name: Upload To Azure Blob Storage - Develop
+        if: ${{github.ref == 'refs/heads/develop'}}
+        uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+        with:
+          source_dir: "build"
+          container_name: "$web"
+          connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
