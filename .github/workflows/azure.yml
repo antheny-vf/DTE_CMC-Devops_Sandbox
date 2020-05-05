@@ -39,9 +39,10 @@ jobs:
         run: |
           echo "REACT_APP_ENV=azure_special" > .env
           yarn build
-      - name: Upload To Azure Blob Storage
-        uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+      - name: Azure, upload-batch
+        uses: azure/CLI@v1
         with:
-          source_dir: "build"
-          container_name: "$web/${{ steps.extract_branch.outputs.branch }}"
-          connection_string: ${{ secrets.ConnectionString }}
+          azcliversion: 2.0.72
+          inlineScript: |
+            az storage blob delete-batch -s "\$web" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --destination-path ${{ steps.extract_branch.outputs.branch }}
+            az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" -destination-path ${{ steps.extract_branch.outputs.branch }}
