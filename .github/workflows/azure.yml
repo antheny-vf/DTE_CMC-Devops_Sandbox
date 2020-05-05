@@ -44,5 +44,5 @@ jobs:
         with:
           azcliversion: 2.0.72
           inlineScript: |
-            az storage blob delete-batch -s "\$web" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" --destination-path "/${{ steps.extract_branch.outputs.branch }}""
-            az storage blob upload-batch -d "\$web" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}" -destination-path "/${{ steps.extract_branch.outputs.branch }}""
+            az storage blob delete-batch -s "\$web\" --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
+            az storage blob upload-batch -d "\$web\${{ steps.extract_branch.outputs.branch }}" -s build --connection-string "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}"
