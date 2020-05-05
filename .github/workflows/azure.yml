@@ -44,5 +44,7 @@ jobs:
         with:
           source_dir: "build"
           container_name: "$web"
-          if: ${{github.ref == 'refs/heads/master'}} && connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
-          if: ${{github.ref == 'refs/heads/develop'}} && connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
+          if: ${{github.ref == 'refs/heads/master'}}
+            connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
+          if: ${{github.ref == 'refs/heads/develop'}}
+            connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
