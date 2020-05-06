@@ -1,46 +1,73 @@
-name: Deploy Node.js project to Azure Function App
-
+name: CI
 on:
-  [push]
-
-# CONFIGURATION
-# For help, go to https://github.com/Azure/Actions
-#
-# 1. Set up the following secrets in your repository:
-#   AZURE_FUNCTIONAPP_PUBLISH_PROFILE
-#
-# 2. Change these variables for your configuration:
-env:
-  AZURE_FUNCTIONAPP_NAME: vf-dte-cmc-github-action-test    # set this to your application's name
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '10.x'                     # set this to the node version to use (supports 8.x, 10.x, 12.x)
-
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
 jobs:
-  build-and-deploy:
+  to_aws_then_azure:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout GitHub Action'
-      uses: actions/checkout@master
+      - uses: actions/checkout@v2
+      # - name: Build React app
+      #   run: |
+      #     yarn install
+      #     yarn build
+      # - name: AWS, sync
+      #   uses: jakejarvis/s3-sync-action@master
+      #   with:
+      #     args: --acl public-read --follow-symlinks --delete
+      #   env:
+      #     AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}/${GITHUB_REF##*/}
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_REGION: "us-east-1"
+      #     SOURCE_DIR: "build"
+      # - name: AWS, invalidate CF cache
+      #   uses: chetan/invalidate-cloudfront-action@master
+      #   env:
+      #     DISTRIBUTION: E3TVX4G8S2YZV7
+      #     PATHS: '/*'
+      #     AWS_REGION: 'us-east-1'
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # - name: Azure, set ENV & rebuild
+      #   run: |
+      #     echo "REACT_APP_ENV=azure_special" > .env
+      #     yarn build
+      # - name: Upload To Azure Blob Storage - Master
+      #   if: ${{github.ref == 'refs/heads/master'}}
+      #   uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+      #   with:
+      #     source_dir: "build"
+      #     container_name: "$web"
+      #     connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING1 }}
+      # - name: Upload To Azure Blob Storage - Develop
+      #   if: ${{github.ref == 'refs/heads/develop'}}
+      #   uses: bacongobbler/azure-blob-storage-upload@v1.1.1
+      #   with:
+      #     source_dir: "build"
+      #     container_name: "$web"
+      #     connection_string: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING2 }}
 
-    - name: Setup Node ${{ env.NODE_VERSION }} Environment
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-
-    - name: 'Resolve Project Dependencies Using Npm'
-      shell: bash
-      run: |
-        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
-        npm install
-        npm run build --if-present
-        npm run test --if-present
-        popd
-    - name: 'Run Azure Functions Action'
-      uses: Azure/functions-action@v1
-      id: fa
-      with:
-        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
-# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
+      - name: 'Login via Azure CLI'
+            uses: azure/login@v1
+            with:
+              creds: ${{ secrets.SCM_CREDENTIALS }}
+          - name: Setup Node 10.x
+            uses: actions/setup-node@v1
+            with:
+              node-version: '10.x'
+      - name: 'Run npm'
+            shell: bash
+            run: |
+              # If your function app project is not located in your repository's root
+              # Please change your directory for npm in pushd
+              pushd .
+              yarn install
+              yarn run build
+          - name: 'Run Azure Functions Action'
+            uses: Azure/functions-action@v1
+            id: fa
+            with:
+              app-name: vf-dte-cmc-github-action-test
