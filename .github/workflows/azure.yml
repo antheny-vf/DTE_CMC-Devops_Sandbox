@@ -26,12 +26,6 @@ jobs:
     needs: check-for-changes
     steps:
     - uses: actions/checkout@v2
-    - name: Check for changes
-      uses: technote-space/get-diff-action@v1
-      id: git_diff
-      with:
-          PREFIX_FILTER: azure/test-vf/server-fn/
-
     - name: Setup Node 10.x Environment
       if: steps.git_diff.outputs.diff
       uses: actions/setup-node@v1
