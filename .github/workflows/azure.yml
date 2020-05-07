@@ -1,32 +1,38 @@
-name: CI
+name: Deploy Node.js project to Azure Function App
 on:
   push:
     branches: [master, develop]
   pull_request:
     branches: [master, develop]
+
+env:
+  AZURE_FUNCTIONAPP_NAME: vf-dte-cmc-github-action-test
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
+
 jobs:
-  to_aws_then_azure:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: 'Login via Azure CLI'
-            uses: azure/login@v1
-            with:
-              creds: ${{ secrets.SCM_CREDENTIALS }}
-          - name: Setup Node 10.x
-            uses: actions/setup-node@v1
-            with:
-              node-version: '10.x'
-      - name: 'Run npm'
-            shell: bash
-            run: |
-              # If your function app project is not located in your repository's root
-              # Please change your directory for npm in pushd
-              pushd .
-              yarn install
-              yarn run build
-          - name: 'Run Azure Functions Action'
-            uses: Azure/functions-action@v1
-            id: fa
-            with:
-              app-name: vf-dte-cmc-github-action-test
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@master
+
+    - name: Setup Node ${{ env.NODE_VERSION }} Environment
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: 'Resolve Project Dependencies Using Npm'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+        popd
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

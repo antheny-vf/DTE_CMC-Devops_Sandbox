@@ -1,0 +1,20 @@
+{
+  "name": "server-fn",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prestart": "npm run build",
+    "start": "func start --port 7072",
+    "test": "echo \"No tests yet...\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@azure/functions": "^1.0.2-beta2",
+    "typescript": "^3.3.3",
+    "axios": "^0.19.2",
+    "sequelize": "^5.21.6",
+    "tedious": "^8.2.0"
+  }
+}
