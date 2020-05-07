@@ -10,12 +10,23 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
 
 jobs:
-  build-and-deploy:
-    name: Deploy Azure Function If Changes
-    runs-on: ubuntu-latest
+  check-for-changes:
     steps:
     - uses: actions/checkout@v2
-    - uses: technote-space/get-diff-action@v1
+    - name: Check for changes
+      uses: technote-space/get-diff-action@v1
+      id: git_diff
+      with:
+          PREFIX_FILTER: azure/test-vf/server-fn/
+
+
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    needs: check-for-changes
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check for changes
+      uses: technote-space/get-diff-action@v1
       id: git_diff
       with:
           PREFIX_FILTER: azure/test-vf/server-fn/
