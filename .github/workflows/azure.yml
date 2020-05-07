@@ -11,7 +11,7 @@ env:
 
 jobs:
   build-and-deploy:
-    name: Build
+    name: Deploy Azure Function If Changes
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: '10.x'
 
-    - name: 'Resolve Project Dependencies Using Npm'
+    - name: Resolve Project Dependencies Using Npm
       if: steps.git_diff.outputs.diff
       shell: bash
       run: |
@@ -34,9 +34,10 @@ jobs:
         npm install
         npm run build --if-present
         npm run test --if-present
+        npm run chill
         popd
 
-    - name: 'Run Azure Functions Action'
+    - name: Run Azure Functions Action
       if: steps.git_diff.outputs.diff
       uses: Azure/functions-action@v1
       id: fa
