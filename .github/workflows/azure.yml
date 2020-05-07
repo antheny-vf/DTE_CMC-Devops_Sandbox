@@ -10,19 +10,24 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
 
 jobs:
-  checkChangesInDocs:
+  eslint:
+    name: ESLint
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@master
-
-    - name: Check changes in docs
-      uses: netlify/actions/diff-includes@master
-      with:
-        # this can be one or many files/directories
-        args: azure/test-vf/server-fn
+      - uses: actions/checkout@v2
+      - uses: technote-space/get-diff-action@v1
+        with:
+          PREFIX_FILTER: azure/test-vf/server-fn/
+      - name: Install Package dependencies
+        run: yarn install
+        if: env.GIT_DIFF
+      - name: Check code style
+        # Check only the source codes that have differences
+        run: yarn eslint ${{ env.GIT_DIFF }}
+        if: env.GIT_DIFF
 
   build-and-deploy:
+    if: steps.git_diff.outputs.diff
     runs-on: ubuntu-latest
     needs: checkChangesInDocs
 
