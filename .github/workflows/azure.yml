@@ -10,16 +10,30 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
 
 jobs:
+  checkChangesInDocs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+
+    - name: Check changes in docs
+      uses: netlify/actions/diff-includes@master
+      with:
+        # this can be one or many files/directories
+        args: azure/test-vf/server-fn
+
   build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
     - name: 'Checkout GitHub Action'
+      needs: checkChangesInDocs
       uses: actions/checkout@master
 
-    - name: Setup Node ${{ env.NODE_VERSION }} Environment
+    - name: Setup Node 10.x Environment
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ env.NODE_VERSION }}
+        node-version: node-version: '10.x'
 
     - name: 'Resolve Project Dependencies Using Npm'
       shell: bash
