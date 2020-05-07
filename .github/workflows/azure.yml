@@ -11,6 +11,7 @@ env:
 
 jobs:
   check-for-changes:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Check for changes
