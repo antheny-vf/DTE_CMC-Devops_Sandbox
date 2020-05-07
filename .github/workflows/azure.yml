@@ -10,25 +10,13 @@ env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
 
 jobs:
-  eslint:
-    name: ESLint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: technote-space/get-diff-action@v1
-        with:
-          PREFIX_FILTER: azure/test-vf/server-fn/
-      - name: Install Package dependencies
-        run: yarn install
-        if: env.GIT_DIFF
-      - name: Check code style
-        # Check only the source codes that have differences
-        run: yarn eslint ${{ env.GIT_DIFF }}
-        if: env.GIT_DIFF
-
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    - uses: actions/checkout@v2
+    - uses: technote-space/get-diff-action@v1
+      id: git_diff
+       with:
+          PREFIX_FILTER: azure/test-vf/server-fn/
     steps:
     - uses: actions/checkout@master
 
@@ -46,7 +34,6 @@ jobs:
         npm install
         npm run build --if-present
         npm run test --if-present
-        npm run chill
         popd
 
     - name: 'Run Azure Functions Action'
