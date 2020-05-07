@@ -33,7 +33,7 @@ jobs:
     - name: Setup Node 10.x Environment
       uses: actions/setup-node@v1
       with:
-        node-version: node-version: '10.x'
+        node-version: '10.x'
 
     - name: 'Resolve Project Dependencies Using Npm'
       shell: bash
