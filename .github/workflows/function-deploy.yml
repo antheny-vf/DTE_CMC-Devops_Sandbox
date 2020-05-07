@@ -20,11 +20,11 @@ jobs:
       with:
           PREFIX_FILTER: azure/test-vf/server-fn/
 
-    - name: Setup Node 10.x Environment
-      if: steps.git_diff.outputs.diff
-      uses: actions/setup-node@v1
-      with:
-        node-version: '10.x'
+    # - name: Setup Node 10.x Environment
+    #   if: steps.git_diff.outputs.diff
+    #   uses: actions/setup-node@v1
+    #   with:
+    #     node-version: '10.x'
 
     # - name: Resolve Project Dependencies Using Npm
     #   if: steps.git_diff.outputs.diff
