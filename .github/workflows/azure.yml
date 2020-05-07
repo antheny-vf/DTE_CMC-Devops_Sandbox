@@ -11,14 +11,14 @@ env:
 
 jobs:
   build-and-deploy:
+    name: Build
     runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v2
     - uses: technote-space/get-diff-action@v1
       id: git_diff
        with:
           PREFIX_FILTER: azure/test-vf/server-fn/
-    steps:
-    - uses: actions/checkout@master
 
     - name: Setup Node 10.x Environment
       if: steps.git_diff.outputs.diff
