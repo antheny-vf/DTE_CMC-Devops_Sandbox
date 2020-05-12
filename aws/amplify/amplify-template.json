@@ -5,34 +5,31 @@
     "App": {
       "Type": "AWS::Amplify::App",
       "Properties": {
-        "Name": "DTE_CMC-Devops_Sandbox1",
+        "Name": "DTE_CMC-Devops_Sandbox2",
         "OauthToken": "9f858a68e61bc6cc9aeeabd991fec72981a4a8a8",
-        "Repository": "DTE_CMC-Devops_Sandbox",
-        "AutoBranchCreationConfig": {
-          "BuildSpec": "amplify.yml",
-          "EnableAutoBranchCreation": "true",
-          "EnableAutoBuild": "true"
-        }
+        "Repository": "https://github.com/antheny-vf/DTE_CMC-Devops_Sandbox",
+        "BuildSpec": "amplify.yml"
       }
     },
     "Master": {
       "Type": "AWS::Amplify::Branch",
       "Properties": {
-        "AppId": {
-          "Ref": "App"
-        },
-        "BranchName": "master"
-      }
+        "AppId": { "Fn::GetAtt": ["App", "AppId"] },
+        "BranchName": "master",
+        "Description": "Master Branch",
+        "EnableAutoBuild": "true"
+      },
+      "DependsOn" : ["App"]
     },
     "Develop": {
       "Type": "AWS::Amplify::Branch",
       "Properties": {
-        "AppId": {
-          "Ref": "App"
-        },
-        "BranchName": "develop"
-      }
+        "AppId": { "Fn::GetAtt": ["App", "AppId"] },
+        "BranchName": "develop",
+        "Description": "Dev Branch",
+        "EnableAutoBuild": "true"
+      },
+      "DependsOn" : ["App"]
     }
-  },
-  "Outputs": {}
+  }
 }
