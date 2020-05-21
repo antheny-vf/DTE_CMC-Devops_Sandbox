@@ -41,7 +41,7 @@ jobs:
 
     - name: Deploy Function
       run: |
-        cd azure/test-vf/server-fn-test
+        cd azure/test-vf/test-function
         npm run build
         func azure functionapp publish vf-dte-cmc-fndeployment-test
         cd ../../..
