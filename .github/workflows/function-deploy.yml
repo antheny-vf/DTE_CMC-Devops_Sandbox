@@ -13,7 +13,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    # - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
     # - name: Check for changes
     #   uses: technote-space/get-diff-action@v1
     #   id: git_diff
