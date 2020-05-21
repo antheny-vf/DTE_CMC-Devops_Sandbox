@@ -1,0 +1,429 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "defaultValue": "vf-dte-cmc-qa-test",
+      "type": "string"
+    },
+
+    "publisherEmail": {
+      "defaultValue": "awells@vectorform.com",
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Admin email"
+      }
+    },
+    "publisherName": {
+      "defaultValue": "VFDTECMC",
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Organization name"
+      }
+    },
+    "resourceTags": {
+      "defaultValue": {
+        "Application": "CMC",
+        "BillTo": "CST",
+        "ContactEmail": "phillip.williams@dteenergy.com",
+        "Environment": "Test",
+        "Portfolio": "n/a",
+        "Project": "CMC"
+      },
+      "type": "object"
+    }
+  },
+  "variables": {
+    "serverFarmName": "[concat(parameters('appName'), '-server_farm')]",
+    "fnServer": "[concat(parameters('appName'), '-fn-server')]",
+    "fnServerId": "[resourceId('Microsoft.Web/sites', concat(parameters('appName'), '-fn-server'))]",
+    "fnServerStorage": "vfdtecmcqatestfnserver",
+    "apiManagementInstanceName": "[concat(parameters('appName'), '-apim')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2016-09-01",
+      "name": "[variables('serverFarmName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y",
+        "capacity": 0
+      },
+      "kind": "functionapp",
+      "properties": {
+        "name": "[variables('serverFarmName')]",
+        "perSiteScaling": false,
+        "reserved": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0
+      },
+      "tags": "[parameters('resourceTags')]"
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2016-08-01",
+      "name": "[variables('fnServer')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('serverFarmName'))]"
+      ],
+      "kind": "functionapp",
+      "properties": {
+        "enabled": true,
+        "hostNameSslStates": [
+          {
+            "name": "[concat(parameters('appName'), '.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Standard"
+          },
+          {
+            "name": "[concat(variables('fnServer'), '.scm.azurewebsites.net')]",
+            "sslState": "Disabled",
+            "hostType": "Repository"
+          }
+        ],
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('serverFarmName'))]",
+        "reserved": false,
+        "isXenon": false,
+        "hyperV": false,
+        "siteConfig": {},
+        "scmSiteAlsoStopped": false,
+        "clientAffinityEnabled": true,
+        "clientCertEnabled": false,
+        "hostNamesDisabled": false,
+        "containerSize": 1536,
+        "dailyMemoryTimeQuota": 0,
+        "httpsOnly": false
+      },
+      "tags": "[parameters('resourceTags')]"
+    },
+    {
+      "type": "Microsoft.Web/sites/host/functionKeys",
+      "apiVersion": "2018-11-01",
+      "name": "[concat(variables('fnServer'), '/default/apimanagement')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('fnServer'))]"
+      ],
+      "properties": {
+        "name": "api-management"
+      },
+      "tags": "[parameters('resourceTags')]"
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2018-02-01",
+      "name": "[concat(variables('fnServer'), '/web')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('fnServer'))]"
+      ],
+      "properties": {
+        "numberOfWorkers": 1,
+        "defaultDocuments": [
+          "Default.htm",
+          "Default.html",
+          "Default.asp",
+          "index.htm",
+          "index.html",
+          "iisstart.htm",
+          "default.aspx",
+          "index.php"
+        ],
+        "netFrameworkVersion": "v4.0",
+        "phpVersion": "5.6",
+        "pythonVersion": "",
+        "nodeVersion": "",
+        "linuxFxVersion": "",
+        "requestTracingEnabled": false,
+        "remoteDebuggingEnabled": false,
+        "httpLoggingEnabled": false,
+        "logsDirectorySizeLimit": 35,
+        "detailedErrorLoggingEnabled": false,
+        "publishingUsername": "$fa-create-and-retrieve-azure-functions-function-keys-arm",
+        "scmType": "None",
+        "use32BitWorkerProcess": true,
+        "webSocketsEnabled": false,
+        "alwaysOn": false,
+        "appCommandLine": "",
+        "managedPipelineMode": "Integrated",
+        "virtualApplications": [
+          {
+            "virtualPath": "/",
+            "physicalPath": "site\\wwwroot",
+            "preloadEnabled": false,
+            "virtualDirectories": null
+          }
+        ],
+        "winAuthAdminState": 0,
+        "winAuthTenantState": 0,
+        "customAppPoolIdentityAdminState": false,
+        "customAppPoolIdentityTenantState": false,
+        "loadBalancing": "LeastRequests",
+        "routingRules": [],
+        "experiments": {
+          "rampUpRules": []
+        },
+        "autoHealEnabled": false,
+        "vnetName": "",
+        "siteAuthEnabled": false,
+        "siteAuthSettings": {
+          "enabled": null,
+          "unauthenticatedClientAction": null,
+          "tokenStoreEnabled": null,
+          "allowedExternalRedirectUrls": null,
+          "defaultProvider": null,
+          "clientId": null,
+          "clientSecret": null,
+          "clientSecretCertificateThumbprint": null,
+          "issuer": null,
+          "allowedAudiences": null,
+          "additionalLoginParams": null,
+          "isAadAutoProvisioned": false,
+          "googleClientId": null,
+          "googleClientSecret": null,
+          "googleOAuthScopes": null,
+          "facebookAppId": null,
+          "facebookAppSecret": null,
+          "facebookOAuthScopes": null,
+          "twitterConsumerKey": null,
+          "twitterConsumerSecret": null,
+          "microsoftAccountClientId": null,
+          "microsoftAccountClientSecret": null,
+          "microsoftAccountOAuthScopes": null
+        },
+        "cors": {
+          "allowedOrigins": [
+            "https://functions.azure.com",
+            "https://functions-staging.azure.com",
+            "https://functions-next.azure.com"
+          ],
+          "supportCredentials": false
+        },
+        "localMySqlEnabled": false,
+        "ipSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 1,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictions": [
+          {
+            "ipAddress": "Any",
+            "action": "Allow",
+            "priority": 1,
+            "name": "Allow all",
+            "description": "Allow all access"
+          }
+        ],
+        "scmIpSecurityRestrictionsUseMain": false,
+        "http20Enabled": false,
+        "minTlsVersion": "1.2",
+        "ftpsState": "AllAllowed",
+        "reservedInstanceCount": 0,
+        "fileChangeAuditEnabled": false,
+        "functionsRuntimeScaleMonitoringEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/hostNameBindings",
+      "apiVersion": "2016-08-01",
+      "name": "[concat(variables('fnServer'), '/', variables('fnServer'), '.azurewebsites.net')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('fnServer'))]"
+      ],
+      "properties": {
+        "siteName": "fa-create-and-retrieve-azure-functions-function-keys-arm",
+        "hostNameType": "Verified"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-04-01",
+      "name": "[variables('fnServerStorage')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "Storage",
+      "properties": {
+        "networkAcls": {
+          "bypass": "AzureServices",
+          "virtualNetworkRules": [],
+          "ipRules": [],
+          "defaultAction": "Allow"
+        },
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "enabled": true
+            },
+            "blob": {
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "apiVersion": "2019-04-01",
+      "name": "[concat(variables('fnServerStorage'), '/default')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('fnServerStorage'))]"
+      ],
+      "properties": {
+        "cors": {
+          "corsRules": []
+        },
+        "deleteRetentionPolicy": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2019-04-01",
+      "name": "[concat(variables('fnServerStorage'), '/default/azure-webjobs-hosts')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('fnServerStorage'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('fnServerStorage'))]"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2019-04-01",
+      "name": "[concat(variables('fnServerStorage'), '/default/azure-webjobs-secrets')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('fnServerStorage'), 'default')]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('fnServerStorage'))]"
+      ],
+      "properties": {
+        "publicAccess": "None"
+      }
+    },
+
+    {
+      "type": "Microsoft.ApiManagement/service",
+      "apiVersion": "2019-01-01",
+      "name": "[variables('apiManagementInstanceName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Developer",
+        "capacity": 1
+      },
+      "properties": {
+        "publisherEmail": "[parameters('publisherEmail')]",
+        "publisherName": "[parameters('publisherName')]",
+        "notificationSenderEmail": "apimgmt-noreply@mail.windowsazure.com",
+        "hostnameConfigurations": [
+          {
+            "type": "Proxy",
+            "hostName": "[concat(variables('apiManagementInstanceName'), '.azure-api.net')]",
+            "negotiateClientCertificate": false,
+            "defaultSslBinding": true
+          }
+        ],
+        "customProperties": {
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls10": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Tls11": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Protocols.Ssl30": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Ciphers.TripleDes168": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls10": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Tls11": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Security.Backend.Protocols.Ssl30": "False",
+          "Microsoft.WindowsAzure.ApiManagement.Gateway.Protocols.Server.Http2": "False"
+        },
+        "virtualNetworkType": "None"
+      }
+    },
+
+
+    {
+      "type": "Microsoft.ApiManagement/service/apis",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementInstanceName'), '/', variables('fnServer'))]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementInstanceName'))]"
+      ],
+      "properties": {
+          "displayName": "[variables('fnServer')]",
+          "apiRevision": "1",
+          "path": "[variables('fnServer')]",
+          "description": "Import from fn-server function app",
+          "subscriptionRequired": true,
+          "protocols": [
+              "https"
+          ],
+          "isCurrent": true
+      }
+  },
+  {
+      "type": "Microsoft.ApiManagement/service/backends",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementInstanceName'), '/', variables('fnServer'))]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementInstanceName'))]"
+      ],
+      "properties": {
+          "url": "[concat('https://', variables('fnServer'), '.azurewebsites.net/api')]",
+          "protocol": "http",
+          "resourceId": "[concat('https://management.azure.com/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/', variables('fnServer'))]",
+          "credentials": {
+      "header": {
+          "x-functions-key": [
+              "[listkeys(concat(variables('fnServerId'), '/host/default/'),'2016-08-01').functionKeys.apimanagement]"
+          ]
+              }
+          }
+      }
+  },
+  {
+      "type": "Microsoft.ApiManagement/service/apis/operations",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementInstanceName'), '/', variables('fnServer'), '/get-cache')]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis', variables('apiManagementInstanceName'), variables('fnServer'))]",
+          "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementInstanceName'))]"
+      ],
+      "properties": {
+          "displayName": "cache",
+          "method": "GET",
+          "urlTemplate": "/cache",
+          "templateParameters": [
+          ],
+          "responses": [
+          ]
+      }
+  },
+  {
+      "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+      "apiVersion": "2019-01-01",
+      "name": "[concat(variables('apiManagementInstanceName'), '/', variables('fnServer'), '/get-cache/policy')]",
+      "dependsOn": [
+          "[resourceId('Microsoft.ApiManagement/service/apis/operations', variables('apiManagementInstanceName'), variables('fnServer'), 'get-cache')]",
+          "[resourceId('Microsoft.ApiManagement/service/apis', variables('apiManagementInstanceName'), variables('fnServer'))]",
+          "[resourceId('Microsoft.ApiManagement/service', variables('apiManagementInstanceName'))]"
+      ],
+      "properties": {
+          "value": "<policies>\r\n  <inbound>\r\n    <base />\r\n    <set-backend-service id=\"apim-generated-policy\" backend-id=\"dte-qa-cmc-fn-server\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>",
+          "format": "xml"
+      }
+  }
+  ]
+}

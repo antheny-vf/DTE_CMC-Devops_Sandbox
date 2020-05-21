@@ -6,7 +6,7 @@
       "Type": "AWS::Amplify::App",
       "Properties": {
         "Name": "DTE_CMC-Devops_Sandbox1",
-        "OauthToken": "19753fdaea63076be15a0e401e2685a4d6f7a5b8",
+        "OauthToken": "409a427b1717976e126c513a000a917eecc64562",
         "Repository": "https://github.com/antheny-vf/DTE_CMC-Devops_Sandbox"
       }
     },
