@@ -14,11 +14,13 @@ jobs:
       with:
         repository: antheny-vf/cmc
         token: ${{ secrets.GH_PAT }}
+
     - name: Check for changes
       uses: technote-space/get-diff-action@v1
       id: git_diff
       with:
           PREFIX_FILTER: azure/test-vf/test-function
+
     - name: Intall Azure CLI + Function Core Tools
       run: |
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -28,11 +30,12 @@ jobs:
 
         sudo apt-get update
         sudo apt-get install azure-functions-core-tools
+
     - name: Azure Login
       uses: azure/login@v1
-      # uses: Azure/functions-action@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+
     - name: Deploy Function
       run: |
         cd azure/test-vf/test-function
