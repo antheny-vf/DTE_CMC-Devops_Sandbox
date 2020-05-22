@@ -1,0 +1,10 @@
+    - name: Intall Azure Function Core Tools
+      run: |
+        npm install -g azure-functions-core-tools
+
+    - name: Deploy Function
+      run: |
+        cd azure/test-vf/server-fn
+        npm run build
+        func azure functionapp publish <app-name>
+        cd ../../..

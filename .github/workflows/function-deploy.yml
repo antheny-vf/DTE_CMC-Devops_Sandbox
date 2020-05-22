@@ -5,30 +5,20 @@ on:
   pull_request:
     branches: [master, develop]
 
-# env:
-  # AZURE_FUNCTIONAPP_NAME: vf-dte-cmc-github-action-test
-  # AZURE_FUNCTIONAPP_PACKAGE_PATH: './azure/test-vf/server-fn'
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    # - name: Check for changes
-    #   uses: technote-space/get-diff-action@v1
-    #   id: git_diff
-    #   with:
-    #       PREFIX_FILTER: azure/test-vf/server-fn/
-
-    # - name: Run Azure Functions Action
-    #   if: steps.git_diff.outputs.diff
-    #   uses: Azure/functions-action@v1
-    #   id: fa
-    #   with:
-    #     app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
-    #     package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-    #     publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
+    - name: Checkout Private Repo
+      uses: actions/checkout@v2
+      with:
+        repository: antheny-vf/cmc
+        token: ${{ secrets.GH_PAT }}
+    - name: Check for changes
+      uses: technote-space/get-diff-action@v1
+      id: git_diff
+      with:
+          PREFIX_FILTER: azure/test-vf/test-function
     - name: Intall Azure CLI + Function Core Tools
       run: |
         curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
@@ -38,10 +28,13 @@ jobs:
 
         sudo apt-get update
         sudo apt-get install azure-functions-core-tools
-
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Deploy Function
+      uses: Azure/functions-action@v1
       run: |
         cd azure/test-vf/test-function
         npm run build
         func azure functionapp publish vf-dte-cmc-fndeployment-test
-        cd ../../..
